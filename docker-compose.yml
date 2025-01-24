@@ -1,0 +1,53 @@
+services:
+  kafka:
+    container_name: kafka
+    hostname: kafka.example.com
+    image: bitnami/kafka:3.6.0
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9094
+      KAFKA_CFG_LISTENERS: SASL_SSL://:9092,SASL_SSL_INTERNAL://:9093,CONTROLLER://:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: SASL_SSL:PLAINTEXT,SASL_SSL_INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_ADVERTISED_LISTENERS: SASL_SSL://localhost:9092,SASL_SSL_INTERNAL://${KAFKA_0_IP}:9093
+      KAFKA_CLIENT_USERS: user
+      KAFKA_CLIENT_PASSWORDS: password
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_CONTROLLER_USER: controller_user
+      KAFKA_CONTROLLER_PASSWORD: controller_password
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: SASL_SSL_INTERNAL
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_USER: controller_user
+      KAFKA_INTER_BROKER_PASSWORD: controller_password
+      KAFKA_CERTIFICATE_PASSWORD: certificatePassword123
+    ports:
+      - "9092:9092"
+    networks:
+      net:
+        ipv4_address: ${KAFKA_0_IP}
+
+  kafka-ui:
+    container_name: kafka_ui
+    image: provectuslabs/kafka-ui:master
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_PROPERTIES_PROTOCOL: PLAINTEXT
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+    ports:
+      - 8080:8080
+    networks:
+      net:
+        ipv4_address: ${KAFKA_UI_IP}
+
+
+networks:
+  net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET}

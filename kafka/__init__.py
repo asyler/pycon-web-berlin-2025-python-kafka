@@ -1,0 +1,2 @@
+KAFKA_TOPIC = 'demo-topic'
+NUM_OF_PARTITIONS = 4
